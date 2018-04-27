@@ -7,7 +7,7 @@ resource "aws_s3_bucket" "kops" {
   acl    = "private"
 
   tags {
-    Name        = "${var.candidate}.k8s.infinityworks.com"
+    Name        = "${replace(var.candidate, "_", "-")}-k8s-infinityworks-com"
     Terraform   = "true"
     Environment = "dev"
   }
