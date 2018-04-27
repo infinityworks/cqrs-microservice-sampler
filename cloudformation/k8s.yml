@@ -1,0 +1,46 @@
+Description: 
+  This template creates the resources required by kops to successfully provision a k8s cluster.
+
+Parameters:
+  CandidateName:
+    Description: |
+      The candidate's name that will be prefixed to resource names.
+      Please be aware that this must not contain other than lowercase alpha and dash.
+      ie.: please replace '_' with '-'.
+    Type: String
+
+Resources:
+  KopsBucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      AccessControl: "Private"
+      BucketName: !Sub ${CandidateName}-k8s-infinityworks-com
+      Tags:
+        - Key: Name 
+          Value: !Sub ${CandidateName}-k8s-infinityworks-com
+
+  KopsIAMUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Sub ${CandidateName}-kops
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonRoute53FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/IAMFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
+      Path: "/k8s/"
+
+  KopsUserAccess:
+    Type: AWS::IAM::AccessKey
+    Properties: 
+      UserName: !Ref KopsIAMUser
+
+Outputs:
+  AccessKeyId: 
+    Description: Access key ID for the kops user
+    Value: !Ref KopsUserAccess
+
+  SecretAccessKey: 
+    Description: Secret Access key for the kops user
+    Value: !GetAtt KopsUserAccess.SecretAccessKey
